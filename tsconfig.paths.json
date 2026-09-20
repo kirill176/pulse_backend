@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@decorators/*": ["./src/common/decorators/*"],
+      "@pipes/*": ["./src/common/pipes/*"],
+      "@modules/*": ["./src/modules/*"]
+    }
+  }
+}
