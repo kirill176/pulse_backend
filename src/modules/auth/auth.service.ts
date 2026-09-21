@@ -11,6 +11,9 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user-dto';
 import * as bcrypt from 'bcryptjs';
 
+const DUMMY_HASH =
+  '$2b$10$7EqJtq98hPqEX7fNZaODi.m8L0bXf0.aD4dG9h1Sj6rK2k3y5W7uG';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,7 +21,21 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  async login(dto: LoginUserDto) {}
+  async login(dto: LoginUserDto) {
+    const { email, password } = dto;
+    const user = await this.usersService.findByEmail(email);
+
+    const passwordHash = user?.password ?? DUMMY_HASH;
+    const isPasswordEqual = await bcrypt.compare(password, passwordHash);
+
+    if (!isPasswordEqual || !user) {
+      throw new UnauthorizedException({
+        message: 'Invalid credentials.',
+      });
+    }
+
+    return this.generateToken(user);
+  }
 
   async registration(dto: CreateUserDto) {
     const { email, password } = dto;
@@ -31,7 +48,7 @@ export class AuthService {
       );
     }
 
-    const hashPassword = await bcrypt.hash(password, 5);
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const createdUser = await this.usersService.createUser({
       ...dto,
@@ -64,7 +81,6 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException({
         message: 'User unauthorized.',
-        status: HttpStatus.UNAUTHORIZED,
       });
     }
   }
