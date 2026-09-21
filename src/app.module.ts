@@ -4,13 +4,16 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from './modules/users/users.model';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthService } from '@modules/auth/auth.service';
-import { APP_GUARD } from '@nestjs/core';
-import { JWTAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
-import { AuthController } from '@modules/auth/auth.controller';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,

@@ -36,7 +36,7 @@ export class JWTAuthGuard implements CanActivate {
       if (bearer !== 'Bearer' || !token) {
         throw new UnauthorizedException({
           message: 'User is unnauthorized.',
-          status: HttpStatus.UNAUTHORIZED,
+          statusCode: HttpStatus.UNAUTHORIZED,
         });
       }
 
@@ -47,7 +47,7 @@ export class JWTAuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException({
         message: 'User is unnauthorized.',
-        status: HttpStatus.UNAUTHORIZED,
+        statusCode: HttpStatus.UNAUTHORIZED,
       });
     }
   }
