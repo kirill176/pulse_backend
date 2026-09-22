@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDto } from './dto/login-user-dto';
-import { CreateUserDto } from '../users/dto/create-user-dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Public } from '@decorators/public.decorator';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
