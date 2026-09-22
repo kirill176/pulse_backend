@@ -5,7 +5,9 @@ import { User } from './modules/users/users.model';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { createObserveModule } from '@nestjs/observe';
 
+export const { ObserveModule, ObserveInstrument } = createObserveModule();
 @Module({
   imports: [
     ThrottlerModule.forRoot([
@@ -27,6 +29,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
       database: process.env.POSTGRES_DB,
       models: [User],
       autoLoadModels: true,
+    }),
+    ObserveModule.forRoot({
+      appKey: process.env.OBSERVE_APP_KEY as string,
+      appSecret: process.env.OBSERVE_APP_SECRET as string,
+      serviceId: process.env.OBSERVE_APP_SERVICE_ID as string,
     }),
     UsersModule,
     AuthModule,

@@ -4,11 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginUserDto } from './dto/login-user-dto';
+import { LoginUserDto } from './dto/login-user.dto';
 import { User } from '../users/users.model';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user-dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
 
 const DUMMY_HASH =

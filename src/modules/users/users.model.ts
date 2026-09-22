@@ -1,3 +1,4 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface UserCreationAttrs {
@@ -19,6 +20,7 @@ export class User extends Model<User, UserCreationAttrs> {
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   email: string;
 
+  @ApiHideProperty()
   @Column({ type: DataType.STRING, allowNull: false })
   password: string;
 
