@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { LoginUserDto } from './dto/login-user.dto';
+import { LoginUserDto, RegisterUserDto } from './dto/login-user.dto';
 import { User } from '../users/users.model';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -34,11 +34,13 @@ export class AuthService {
       });
     }
 
-    return this.generateToken(user);
+    const tokens = await this.generateToken(user);
+
+    return { ...tokens, user };
   }
 
-  async registration(dto: CreateUserDto) {
-    const { email, password } = dto;
+  async registration(dto: RegisterUserDto) {
+    const { email, password, userName: usName } = dto;
     const user = await this.usersService.findByEmail(email);
 
     if (user) {
@@ -48,13 +50,19 @@ export class AuthService {
       );
     }
 
+    const userName = usName ?? email.split('@')?.[0];
+
     const hashPassword = await bcrypt.hash(password, 10);
 
     const createdUser = await this.usersService.createUser({
       ...dto,
+      userName,
       password: hashPassword,
     });
-    return await this.generateToken(createdUser);
+
+    const tokens = await this.generateToken(createdUser);
+
+    return { ...tokens, createdUser };
   }
 
   private async generateToken(user: User) {
