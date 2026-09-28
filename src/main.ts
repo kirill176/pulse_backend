@@ -2,12 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CustomValidationPipe } from '@pipes/validation.pipe';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const PORT = process.env.PORT ?? 5000;
 
   const app = await NestFactory.create(AppModule, {
     instrument: ObserveInstrument,
+  });
+
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   });
 
   app.setGlobalPrefix('api');

@@ -8,3 +8,14 @@ export class LoginUserDto {
   @IsNotEmpty()
   readonly password: string;
 }
+
+export class RegisterUserDto {
+  @IsEmail()
+  @IsNotEmpty()
+  readonly email: string;
+
+  @IsNotEmpty()
+  readonly password: string;
+
+  readonly userName: string;
+}

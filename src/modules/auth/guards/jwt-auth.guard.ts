@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import type { Request } from 'express';
 import { IS_PUBLIC_KEY } from '@decorators/public.decorator';
 
 @Injectable()
@@ -27,22 +28,20 @@ export class JWTAuthGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    const req = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest<Request>();
+
+    const token = this.extractToken(req);
+
+    if (!token) {
+      throw new UnauthorizedException({
+        message: 'User is unnauthorized.',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
 
     try {
-      const authHeader = req.headers.authorization;
-      const [bearer, token] = authHeader.split(' ');
-
-      if (bearer !== 'Bearer' || !token) {
-        throw new UnauthorizedException({
-          message: 'User is unnauthorized.',
-          statusCode: HttpStatus.UNAUTHORIZED,
-        });
-      }
-
       const user = this.jwtService.verify(token);
-
-      req.user = user;
+      (req as Request & { user: any }).user = user;
       return true;
     } catch {
       throw new UnauthorizedException({
@@ -50,5 +49,17 @@ export class JWTAuthGuard implements CanActivate {
         statusCode: HttpStatus.UNAUTHORIZED,
       });
     }
+  }
+
+  private extractToken(req: Request): string | undefined {
+    if (req.cookies?.accessToken) {
+      return req.cookies.accessToken;
+    }
+
+    const [bearer, token] = req.headers.authorization?.split(' ') ?? [];
+    if (bearer === 'Bearer' && token) {
+      return token;
+    }
+    return undefined;
   }
 }
