@@ -29,6 +29,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       database: process.env.POSTGRES_DB,
       models: [User],
       autoLoadModels: true,
+      synchronize: true,
+      sync: { alter: true },
     }),
     ObserveModule.forRoot({
       appKey: process.env.OBSERVE_APP_KEY as string,

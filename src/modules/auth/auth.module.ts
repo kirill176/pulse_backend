@@ -6,10 +6,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JWTAuthGuard } from './guards/jwt-auth.guard';
+import { PassportModule } from '@nestjs/passport';
+import { GoogleStrategy } from './strategies/google.stategy';
 
 @Module({
   providers: [
     AuthService,
+    GoogleStrategy,
     {
       provide: APP_GUARD,
       useClass: JWTAuthGuard,
@@ -17,6 +20,7 @@ import { JWTAuthGuard } from './guards/jwt-auth.guard';
   ],
   controllers: [AuthController],
   imports: [
+    PassportModule,
     UsersModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
