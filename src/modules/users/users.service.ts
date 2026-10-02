@@ -1,6 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Body, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,5 +29,9 @@ export class UsersService {
         { cause: error },
       );
     }
+  }
+
+  async updateUser(userDto: UpdateUserDto, userId: string) {
+    return await this.userRepository.updateUser(userDto, userId);
   }
 }

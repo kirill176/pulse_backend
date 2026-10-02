@@ -8,8 +8,8 @@ import { LoginUserDto, RegisterUserDto } from './dto/login-user.dto';
 import { User } from '../users/users.model';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const DUMMY_HASH =
   '$2b$10$7EqJtq98hPqEX7fNZaODi.m8L0bXf0.aD4dG9h1Sj6rK2k3y5W7uG';
@@ -34,9 +34,7 @@ export class AuthService {
       });
     }
 
-    const tokens = await this.generateToken(user);
-
-    return { ...tokens, user };
+    return await this.generateToken(user);
   }
 
   async registration(dto: RegisterUserDto) {
@@ -60,9 +58,22 @@ export class AuthService {
       password: hashPassword,
     });
 
-    const tokens = await this.generateToken(createdUser);
+    return await this.generateToken(createdUser);
+  }
 
-    return { ...tokens, createdUser };
+  async validateOAuthUser(googleUser: { email: string; userName: string }) {
+    let user = await this.usersService.findByEmail(googleUser.email);
+
+    if (!user) {
+      user = await this.usersService.createUser({
+        email: googleUser.email,
+        userName: googleUser.userName,
+        password: uuidv4(),
+        isVerified: true,
+      });
+    }
+
+    return this.generateToken(user);
   }
 
   private async generateToken(user: User) {

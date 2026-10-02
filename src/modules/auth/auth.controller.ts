@@ -1,11 +1,20 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Public } from '@decorators/public.decorator';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Cookies } from '@decorators/cookie.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -25,12 +34,11 @@ export class AuthController {
     @Body() userDto: LoginUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, user } =
-      await this.authService.login(userDto);
+    const { accessToken, refreshToken } = await this.authService.login(userDto);
 
     this.setCookies(accessToken, refreshToken, res);
 
-    return { email: user.email, userName: user.userName };
+    return { message: 'Logged in successfully' };
   }
 
   @UseGuards(ThrottlerGuard)
@@ -40,12 +48,12 @@ export class AuthController {
     @Body() userDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, createdUser } =
+    const { accessToken, refreshToken } =
       await this.authService.registration(userDto);
 
     this.setCookies(accessToken, refreshToken, res);
 
-    return { email: createdUser.email, userName: createdUser.userName };
+    return { message: 'User successfully registered' };
   }
 
   @Post('/refresh')
@@ -58,7 +66,33 @@ export class AuthController {
 
     this.setCookies(accessToken, refreshToken, res);
 
-    return { message: 'Tokens successfully refreshed.' };
+    return { message: 'Tokens successfully refreshed' };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const googleUser = req.user as { email: string; userName: string };
+
+    const { accessToken, refreshToken } =
+      await this.authService.validateOAuthUser(googleUser);
+
+    await this.setCookies(accessToken, refreshToken, res);
+
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+
+    return res.redirect(`${clientUrl}/`);
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('accessToken', { path: '/' });
+    return { message: 'Logged out successfully' };
   }
 
   private setCookies(accessToken: string, refreshToken: string, res: Response) {

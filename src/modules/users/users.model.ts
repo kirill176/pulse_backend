@@ -26,4 +26,12 @@ export class User extends Model<User, UserCreationAttrs> {
 
   @Column({ type: DataType.STRING, allowNull: false })
   userName: string;
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  isVerified: boolean;
+
+  public toJSON(): any {
+    const { password, ...userWithoutPassword } = this.get();
+    return userWithoutPassword;
+  }
 }
